@@ -1,0 +1,200 @@
+<div class="card div-card">
+  <p-toolbar styleClass="mb-4 gap-2" [style]="{background:'#e8e8e8'}">
+    <ng-template pTemplate="left">
+      <div class="toolbar-options">
+        <p-button
+          (onClick)="abrirNovo()"
+          class="mr-2"
+          icon="pi pi-plus"
+          label="New"
+          severity="success"/>
+        <p-button
+          (onClick)="deletarProdutosSelecionados()"
+          [disabled]="!produtosSelecionados || !produtosSelecionados.length"
+          icon="pi pi-trash"
+          label="Delete"
+          severity="danger"/>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="right">
+      <div>
+        <p class="toolbar-estatistic">Total de {{ listaDeProdutos ? listaDeProdutos.length : 0 }} produtos</p>
+      </div>
+    </ng-template>
+  </p-toolbar>
+
+  <div *ngIf="carregando" class="indicador-carregamento">
+    <p-progressSpinner></p-progressSpinner>
+  </div>
+
+  <div *ngIf="!carregando">
+    <p-table
+      #dt
+      [(selection)]="produtosSelecionados"
+      [paginator]="true"
+      [rowHover]="true"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      [tableStyle]="{ 'min-width': '70rem' }"
+      [value]="listaDeProdutos"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} produtos"
+      dataKey="id">
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 1rem;">
+            <p-tableHeaderCheckbox/>
+          </th>
+          <th style="min-width:5rem">
+            NOME
+          </th>
+          <th style="min-width: 5rem;">
+            DESCRIÇÃO
+          </th>
+          <th>
+            PREÇO
+          </th>
+          <th>
+            UN. MEDIDA
+          </th>
+          <th>
+            QUANTIDADE
+          </th>
+          <th>
+            MERCADO
+          </th>
+          <th style="text-align: center">
+            AÇÕES
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-product>
+        <tr>
+          <td>
+            <p-tableCheckbox [value]="product"/>
+          </td>
+          <td>
+            {{ product.nome }}
+          </td>
+          <td>
+            {{ product.descricao }}
+          </td>
+          <td>
+            {{ product.preco | currency : 'BRL' }}
+          </td>
+          <td>
+            {{ product.unidadeMedida }}
+          </td>
+          <td>
+            {{ product.quantidade }}
+          </td>
+          <td>
+            {{ product.mercado }}
+          </td>
+          <td class="btn-acoes">
+            <p-button
+              icon="pi pi-pencil"
+              class="mr-2"
+              severity="primary"
+              [outlined]="true"
+              (onClick)="editarProduto(product)"/>
+            <p-button
+              icon="pi pi-trash"
+              severity="danger"
+              [outlined]="true"
+              (onClick)="deletarProduto(product)"/>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <p-dialog
+    [(visible)]="produtoDialogo"
+    [style]="{ width: '400px', height: '500px' }"
+    header="PRODUTO"
+    [modal]="true"
+    styleClass="p-fluid">
+    <ng-template pTemplate="content">
+      <div class="form-modal">
+        <div class="field">
+          <label for="nome">Nome:</label>
+          <input
+            type="text"
+            pInputText
+            id="nome"
+            [(ngModel)]="produto.nome"
+            required
+            autofocus/>
+          <small *ngIf="enviado && !produto.nome" class="p-error">
+            Nome é obrigatório!
+          </small>
+        </div>
+        <div class="field">
+          <label for="descricao">Descrição:</label>
+          <input
+            type="text"
+            pInputText
+            id="descricao"
+            [(ngModel)]="produto.descricao"
+            required
+            autofocus/>
+        </div>
+        <div class="input-row">
+          <div class="field">
+            <label class="mb-3">Preço:</label>
+            <p-inputNumber
+              [(ngModel)]="produto.preco"
+              currency="BRL"
+              locale="pt-BR"
+              mode="currency"/>
+          </div>
+          <div class="field">
+            <label for="unidadeMedida">Unidade de Medida:</label>
+            <p-dropdown
+              id="unidadeMedida"
+              [options]="unidadeMedidaDropDown"
+              [(ngModel)]="produto.unidadeMedida"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Selecione uma unidade"/>
+          </div>
+        </div>
+        <div class="input-row">
+          <div class="field">
+            <label for="quantidade">Quantidade:</label>
+            <input
+              type="number"
+              pInputText
+              id="quantidade"
+              [(ngModel)]="produto.quantidade"
+              required/>
+          </div>
+          <div class="field">
+            <label for="mercado">Mercado:</label>
+            <input
+              type="text"
+              pInputText
+              id="mercado"
+              [(ngModel)]="produto.mercado"
+              required/>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="footer">
+      <p-button
+        label="Cancel"
+        icon="pi pi-times"
+        [text]="true"
+        (onClick)="esconderDialogo()"/>
+      <p-button
+        label="Save"
+        icon="pi pi-check"
+        [text]="true"
+        (onClick)="salvarProduto()"/>
+    </ng-template>
+  </p-dialog>
+
+  <p-confirmDialog [style]="{ width: '450px' }"/>
+  <p-toast></p-toast>
+</div>

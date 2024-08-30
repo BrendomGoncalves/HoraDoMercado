@@ -1,0 +1,27 @@
+.toolbar-options{
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.toolbar-estatistic{
+  font-weight: bold;
+}
+
+.btn-acoes{
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.form-modal{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.input-row{
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
