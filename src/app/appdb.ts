@@ -11,7 +11,7 @@ export class AppDB extends Dexie {
   constructor() {
     super('AppDB');
     this.version(1).stores({
-      produtos: '++id, nome, descricao, preco, unidadeMedida, quantidade, mercado',
+      produtos: '++id, nome, descricao, unidadeMedida, quantidade, mercado',
     });
   }
 }
