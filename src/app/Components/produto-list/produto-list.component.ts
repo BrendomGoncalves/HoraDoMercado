@@ -11,9 +11,10 @@ import {InputTextareaModule} from "primeng/inputtextarea";
 import {RadioButtonModule} from "primeng/radiobutton";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {InputTextModule} from "primeng/inputtext";
-import {CurrencyPipe, NgIf} from "@angular/common";
+import {CurrencyPipe, NgForOf, NgIf} from "@angular/common";
 import {ToastModule} from "primeng/toast";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-produto-list',
@@ -31,16 +32,25 @@ import {ProgressSpinnerModule} from "primeng/progressspinner";
     CurrencyPipe,
     NgIf,
     ToastModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    NgForOf
   ],
   templateUrl: './produto-list.component.html',
   styleUrls: ['./produto-list.component.css'],
   providers: [ConfirmationService, MessageService]
 })
 export class ProdutoListComponent implements OnInit {
+  private subscription: Subscription = new Subscription();
   produtoDialogo: boolean = false;
-  listaDeProdutos!: Produto[];
-  produto!: Produto;
+  listaDeProdutos: Produto[] = [];
+  produto: Produto = {
+    id: 0,
+    descricao: "",
+    mercado: [],
+    nome: "",
+    quantidade: 0,
+    unidadeMedida: 'VAZIO'
+  };
   produtosSelecionados!: Produto[] | null;
   enviado: boolean = false;
   unidadeMedidaDropDown: any = [
@@ -49,21 +59,18 @@ export class ProdutoListComponent implements OnInit {
     {label: 'LITRO', value: 'LT'}
   ];
   carregando: boolean = false;
+  precosDialogo: boolean = false;
+  mercado: { nome: string, preco: number } = {nome: '', preco: 0};
+  mercados: { nome: string, preco: number }[] = [];
 
   constructor(private produtoService: ProdutoService, private confirmationService: ConfirmationService, private messageService: MessageService) {
   }
 
   ngOnInit() {
-    this.atualizarListaDeProdutos();
-  }
-
-  atualizarListaDeProdutos() {
     this.carregando = true;
-    this.produtoService.obterProdutos().then((data) => {
-      this.listaDeProdutos = data;
+    this.subscription = this.produtoService.produtos$.subscribe(produtos => {
+      this.listaDeProdutos = produtos;
       this.ordenarProdutosPorNome();
-      this.carregando = false;
-    }).catch(() => {
       this.carregando = false;
     });
   }
@@ -76,9 +83,8 @@ export class ProdutoListComponent implements OnInit {
     this.produto = {
       id: 0,
       descricao: "",
-      mercado: "",
+      mercado: [],
       nome: "",
-      preco: 0,
       quantidade: 0,
       unidadeMedida: 'VAZIO'
     };
@@ -99,7 +105,6 @@ export class ProdutoListComponent implements OnInit {
             detail: 'Produtos Deletados',
             life: 3000
           });
-          this.atualizarListaDeProdutos();
           this.produtosSelecionados = null;
         }).catch(() => {
           this.messageService.add({
@@ -115,6 +120,7 @@ export class ProdutoListComponent implements OnInit {
 
   editarProduto(product: Produto) {
     this.produto = {...product};
+    this.mercados = this.produto.mercado;
     this.produtoDialogo = true;
   }
 
@@ -131,16 +137,14 @@ export class ProdutoListComponent implements OnInit {
             detail: 'Produto Deletado',
             life: 3000
           });
-          this.atualizarListaDeProdutos();
           this.produto = {
             id: 0,
             descricao: "",
-            mercado: "",
+            mercado: [],
             nome: "",
-            preco: 0,
             quantidade: 0,
             unidadeMedida: 'VAZIO'
-          };
+          }
         }).catch(() => {
           this.messageService.add({
             severity: 'error',
@@ -156,13 +160,22 @@ export class ProdutoListComponent implements OnInit {
   esconderDialogo() {
     this.produtoDialogo = false;
     this.enviado = false;
+    this.mercado = {nome: '', preco: 0};
+    this.mercados = [];
+  }
+
+  abrirPrecos(id: number) {
+    this.produto = this.listaDeProdutos.find(p => p.id === id)!;
+    this.precosDialogo = true;
   }
 
   salvarProduto() {
     this.enviado = true;
 
     if (this.produto.nome?.trim()) {
-      if (this.produto.id) {
+      let produtoExistente = this.listaDeProdutos.find(p => p.nome === this.produto.nome);
+      this.produto.mercado = this.mercados;
+      if (produtoExistente) {
         this.produtoService.atualizarProduto(this.produto).then(() => {
           this.messageService.add({
             severity: 'success',
@@ -180,35 +193,43 @@ export class ProdutoListComponent implements OnInit {
         });
       } else {
         this.produtoService.adicionarProduto(this.produto).then(() => {
-          this.produtoService.obterProdutos().then((data) => {
-            this.listaDeProdutos = data;
-            this.ordenarProdutosPorNome();
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Sucesso',
-              detail: 'Produto Criado',
-              life: 3000
-            });
-          }).catch(() => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Erro',
-              detail: 'Erro ao criar o produto',
-              life: 3000
-            })
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: 'Produto Criado',
+            life: 3000
           });
-        })
+        }).catch(() => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: 'Erro ao criar o produto',
+            life: 3000
+          })
+        });
       }
       this.produtoDialogo = false;
       this.produto = {
         id: 0,
         descricao: "",
-        mercado: "",
+        mercado: [],
         nome: "",
-        preco: 0,
         quantidade: 0,
         unidadeMedida: 'VAZIO'
       };
+      this.mercado = {nome: '', preco: 0};
+      this.mercados = [];
     }
+  }
+
+  adicionarMercado() {
+    if (this.mercado.nome && this.mercado.preco) {
+      this.mercados.push({...this.mercado});
+      this.mercado = {nome: '', preco: 0};
+    }
+  }
+
+  removerMercado(index: number) {
+    this.mercados.splice(index, 1);
   }
 }

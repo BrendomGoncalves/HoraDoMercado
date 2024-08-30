@@ -25,3 +25,28 @@
   flex-direction: row;
   gap: 5px;
 }
+
+.input-group{
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+}
+
+.mercados-lista{
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 20px;
+  padding: 0 5px 0 5px;
+}
+
+.mercados{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  p{
+    margin: 0;
+  }
+}
