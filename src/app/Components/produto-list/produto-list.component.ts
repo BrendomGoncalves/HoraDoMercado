@@ -81,10 +81,9 @@ export class ProdutoListComponent implements OnInit {
 
   abrirNovo() {
     this.produto = {
-      id: 0,
+      nome: "",
       descricao: "",
       mercado: [],
-      nome: "",
       quantidade: 0,
       unidadeMedida: 'VAZIO'
     };
@@ -164,62 +163,59 @@ export class ProdutoListComponent implements OnInit {
     this.mercados = [];
   }
 
-  abrirPrecos(id: number) {
+  abrirPrecos(id: number | undefined) {
     this.produto = this.listaDeProdutos.find(p => p.id === id)!;
     this.precosDialogo = true;
   }
 
   salvarProduto() {
     this.enviado = true;
-
-    if (this.produto.nome?.trim()) {
-      let produtoExistente = this.listaDeProdutos.find(p => p.nome === this.produto.nome);
-      this.produto.mercado = this.mercados;
-      if (produtoExistente) {
-        this.produtoService.atualizarProduto(this.produto).then(() => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Sucesso',
-            detail: 'Produto Atualizado',
-            life: 3000
-          });
-        }).catch(() => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erro',
-            detail: 'Erro ao atualizar produto',
-            life: 3000
-          })
+    this.produto.nome = this.produto.nome?.trim();
+    let produtoExistente = this.listaDeProdutos.find(p => p.nome === this.produto.nome);
+    this.produto.mercado = this.mercados;
+    if (produtoExistente) {
+      this.produtoService.atualizarProduto(this.produto).then(() => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Sucesso',
+          detail: 'Produto Atualizado',
+          life: 3000
         });
-      } else {
-        this.produtoService.adicionarProduto(this.produto).then(() => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Sucesso',
-            detail: 'Produto Criado',
-            life: 3000
-          });
-        }).catch(() => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erro',
-            detail: 'Erro ao criar o produto',
-            life: 3000
-          })
+      }).catch(() => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Erro ao atualizar produto',
+          life: 3000
+        })
+      });
+    } else {
+      this.produtoService.adicionarProduto(this.produto).then(() => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Sucesso',
+          detail: 'Produto Criado',
+          life: 3000
         });
-      }
-      this.produtoDialogo = false;
-      this.produto = {
-        id: 0,
-        descricao: "",
-        mercado: [],
-        nome: "",
-        quantidade: 0,
-        unidadeMedida: 'VAZIO'
-      };
-      this.mercado = {nome: '', preco: 0};
-      this.mercados = [];
+      }).catch(() => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Erro ao criar o produto',
+          life: 3000
+        })
+      });
     }
+    this.produtoDialogo = false;
+    this.produto = {
+      descricao: "",
+      mercado: [],
+      nome: "",
+      quantidade: 0,
+      unidadeMedida: 'VAZIO'
+    };
+    this.mercado = {nome: '', preco: 0};
+    this.mercados = [];
   }
 
   adicionarMercado() {

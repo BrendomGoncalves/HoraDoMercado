@@ -30,6 +30,7 @@
   <div *ngIf="!carregando">
     <p-table
       #dt
+      *ngIf="listaDeProdutos.length > 0"
       [(selection)]="produtosSelecionados"
       [paginator]="true"
       [rowHover]="true"
@@ -201,14 +202,14 @@
     header="Mercados | Preços"
     [(visible)]="precosDialogo"
     [modal]="true"
-    [breakpoints]="{ '1199px': '40vw', '575px': '50vw'}"
-    [style]="{ width: '200px'}"
+    [breakpoints]="{ '1199px': '75vw', '575px': '40vw'}"
+    [style]="{ width: '30vw'}"
     [draggable]="false"
     [resizable]="false">
     <ng-template pTemplate="content">
       <div class="mercados-lista">
         <p *ngIf="produto.mercado.length < 1">Nenhum mercado cadastrado.</p>
-        <div class="card">
+        <div class="card" *ngIf="produto.mercado.length > 0">
           <p-table [value]="produto.mercado" [tableStyle]="{ 'min-width': '10rem' }">
             <ng-template pTemplate="header">
               <tr>

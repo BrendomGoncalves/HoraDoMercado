@@ -1,7 +1,7 @@
 import {Mercado} from "./mercado.model";
 
 export interface Produto {
-  id: number;
+  id?: number;
   nome: string;
   descricao: string;
   unidadeMedida: "UN" | "KG" | "LT" | "VAZIO";

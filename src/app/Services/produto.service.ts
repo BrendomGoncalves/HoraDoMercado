@@ -24,6 +24,12 @@ export class ProdutoService {
   }
 
   async adicionarProduto(produto: Produto): Promise<number> {
+    if (produto.id != null) {
+      const existingProduct = await this.db.produtos.get(produto.id);
+      if (existingProduct) {
+        throw new Error('Produto com este ID já existe.');
+      }
+    }
     const id = await this.db.produtos.add(produto);
     await this.carregarProdutos();
     return id;
@@ -38,19 +44,25 @@ export class ProdutoService {
   }
 
   async atualizarProduto(produto: Produto): Promise<number> {
-    const updated = await this.db.produtos.update(produto.id, {
-      nome: produto.nome,
-      descricao: produto.descricao,
-      unidadeMedida: produto.unidadeMedida,
-      quantidade: produto.quantidade,
-      mercado: produto.mercado,
-    });
-    await this.carregarProdutos();
-    return updated;
+    if (produto.id != null) {
+      const updated = await this.db.produtos.update(produto.id, {
+        nome: produto.nome,
+        descricao: produto.descricao,
+        unidadeMedida: produto.unidadeMedida,
+        quantidade: produto.quantidade,
+        mercado: produto.mercado,
+      });
+      await this.carregarProdutos();
+      return updated;
+    } else {
+      throw new Error('Produto sem ID não pode ser atualizado.');
+    }
   }
 
-  async removerProduto(id: number): Promise<void> {
-    await this.db.produtos.delete(id);
+  async removerProduto(id: number | undefined): Promise<void> {
+    if (id != null) {
+      await this.db.produtos.delete(id);
+    }
     await this.carregarProdutos();
   }
 
