@@ -3,7 +3,8 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-pagina-inicial',
   standalone: true,
-  imports: [],
+  imports: [
+  ],
   templateUrl: './pagina-inicial.component.html',
   styleUrl: './pagina-inicial.component.css'
 })
