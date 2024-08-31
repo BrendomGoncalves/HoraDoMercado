@@ -1,16 +1,25 @@
 import {Injectable} from '@angular/core';
-import {AppDB} from "../appdb";
 import {Produto} from "../Models/produto.model";
 import {BehaviorSubject} from "rxjs";
+import Dexie from "dexie";
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProdutoService {
+  private db: Dexie;
+  private table: Dexie.Table<Produto, number>;
+
   private produtosSubject = new BehaviorSubject<Produto[]>([]);
   produtos$ = this.produtosSubject.asObservable();
 
-  constructor(private db: AppDB) {
+  constructor() {
+    this.db = new Dexie('ProdutoDB');
+    this.db.version(1).stores({
+      produtos: '++id, nome, descricao, unidadeMedida, quantidade, mercado',
+    });
+    this.table = this.db.table('produtos');
+
     this.carregarProdutos().then(() => {
       console.log('Produtos carregados...')
     }).catch((err) => {
@@ -23,51 +32,35 @@ export class ProdutoService {
     this.produtosSubject.next(produtos);
   }
 
-  async adicionarProduto(produto: Produto): Promise<number> {
-    if (produto.id != null) {
-      const existingProduct = await this.db.produtos.get(produto.id);
-      if (existingProduct) {
-        throw new Error('Produto com este ID já existe.');
-      }
-    }
-    const id = await this.db.produtos.add(produto);
+  async adicionarProduto(produto: Produto) {
+    this.table.add(produto);
     await this.carregarProdutos();
-    return id;
   }
 
-  async obterProdutos(): Promise<Produto[]> {
-    return this.db.produtos.toArray();
+  async obterProdutos() {
+    return this.table.orderBy('nome').toArray();
   }
 
-  async obterProdutoPorId(id: number): Promise<Produto | undefined> {
-    return this.db.produtos.get(id);
+  async getProdutoById(id: number) {
+    return this.table.get(id);
   }
 
-  async atualizarProduto(produto: Produto): Promise<number> {
-    if (produto.id != null) {
-      const updated = await this.db.produtos.update(produto.id, {
-        nome: produto.nome,
-        descricao: produto.descricao,
-        unidadeMedida: produto.unidadeMedida,
-        quantidade: produto.quantidade,
-        mercado: produto.mercado,
-      });
-      await this.carregarProdutos();
-      return updated;
-    } else {
-      throw new Error('Produto sem ID não pode ser atualizado.');
-    }
-  }
-
-  async removerProduto(id: number | undefined): Promise<void> {
+  async atualizarProduto(id: number | undefined, changes: Partial<Produto>) {
     if (id != null) {
-      await this.db.produtos.delete(id);
+      this.table.update(id, changes);
+      await this.carregarProdutos();
     }
-    await this.carregarProdutos();
   }
 
-  async removerProdutos(ids: number[]): Promise<void> {
-    await this.db.produtos.bulkDelete(ids);
+  async removerProduto(id: number | undefined) {
+    if (id != null) {
+      this.table.delete(id);
+      await this.carregarProdutos();
+    }
+  }
+
+  async removerProdutos(ids: number[]) {
+    this.table.bulkDelete(ids);
     await this.carregarProdutos();
   }
 }

@@ -4,7 +4,7 @@ export interface Produto {
   id?: number;
   nome: string;
   descricao: string;
-  unidadeMedida: "UN" | "KG" | "LT" | "VAZIO";
+  unidadeMedida: string;
   quantidade: number;
   mercado: Mercado[];
 }

@@ -44,7 +44,6 @@ export class ProdutoListComponent implements OnInit {
   produtoDialogo: boolean = false;
   listaDeProdutos: Produto[] = [];
   produto: Produto = {
-    id: 0,
     descricao: "",
     mercado: [],
     nome: "",
@@ -70,13 +69,8 @@ export class ProdutoListComponent implements OnInit {
     this.carregando = true;
     this.subscription = this.produtoService.produtos$.subscribe(produtos => {
       this.listaDeProdutos = produtos;
-      this.ordenarProdutosPorNome();
       this.carregando = false;
     });
-  }
-
-  ordenarProdutosPorNome() {
-    this.listaDeProdutos.sort((a, b) => a.nome.localeCompare(b.nome));
   }
 
   abrirNovo() {
@@ -163,8 +157,8 @@ export class ProdutoListComponent implements OnInit {
     this.mercados = [];
   }
 
-  abrirPrecos(id: number | undefined) {
-    this.produto = this.listaDeProdutos.find(p => p.id === id)!;
+  abrirPrecos(product: Produto) {
+    this.produto = {...product};
     this.precosDialogo = true;
   }
 
@@ -174,7 +168,7 @@ export class ProdutoListComponent implements OnInit {
     let produtoExistente = this.listaDeProdutos.find(p => p.nome === this.produto.nome);
     this.produto.mercado = this.mercados;
     if (produtoExistente) {
-      this.produtoService.atualizarProduto(this.produto).then(() => {
+      this.produtoService.atualizarProduto(this.produto.id, this.produto).then(() => {
         this.messageService.add({
           severity: 'success',
           summary: 'Sucesso',
