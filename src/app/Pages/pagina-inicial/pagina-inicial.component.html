@@ -1,13 +1,51 @@
 <div class="container">
   <div class="row">
     <div class="titulo">
-      <i class="pi pi-shopping-cart"></i>
       <h1 class="text-center">Hora do Mercado</h1>
     </div>
   </div>
   <div class="row">
     <div class="estatisticas-card">
-
+      <section class="page-contain">
+        <a routerLink="/produtos" class="data-card">
+          <h3>{{ quantidadeProdutos }}</h3>
+          <h4>PRODUTOS</h4>
+          <p>Produtos cadastrados no sistema.</p>
+          <span class="link-text">
+            Ver lista de produtos
+            <svg width="25" height="16" viewBox="0 0 25 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd"
+                    d="M17.8631 0.929124L24.2271 7.29308C24.6176 7.68361 24.6176 8.31677 24.2271 8.7073L17.8631 15.0713C17.4726 15.4618 16.8394 15.4618 16.4489 15.0713C16.0584 14.6807 16.0584 14.0476 16.4489 13.657L21.1058 9.00019H0.47998V7.00019H21.1058L16.4489 2.34334C16.0584 1.95281 16.0584 1.31965 16.4489 0.929124C16.8394 0.538599 17.4726 0.538599 17.8631 0.929124Z"
+                    fill="#696969FF"/>
+            </svg>
+          </span>
+        </a>
+        <a routerLink="/produtos" class="data-card">
+          <div class="grupo-h3">
+            <h3 id="primeiro">{{ quantidadeProdutosMercado[0][1] }}</h3>
+            <h3 id="segundo">{{ quantidadeProdutosMercado[1][1] }}</h3>
+            <h3 id="terceiro">{{ quantidadeProdutosMercado[2][1] }}</h3>
+          </div>
+          <h4>MERCADOS</h4>
+          <p>Produtos por mercado cadastrado.</p>
+          <span class="rotulo">
+            <div><span>ASSAI</span></div>
+            <div><span>|</span></div>
+            <div><span>ATACADÃO</span></div>
+            <div><span>|</span></div>
+            <div><span>MALHADO</span></div>
+          </span>
+        </a>
+      </section>
+      <h2 style="margin: 20px 0;color: darkgray;font-size: 1.2rem;">Maiores Quantidades</h2>
+      <div class="slider">
+        <div class="slide-track">
+          <div *ngFor="let produto of produtosMaiorQuantidade" class="slide-quantidade">
+            <h2>{{ produto[1] }}</h2>
+            <h3>{{ produto[0] }}</h3>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
