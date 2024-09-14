@@ -1,22 +1,49 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {ProdutoService} from "./produto.service";
-import {Produto} from "../Models/produto.model";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProdutoEstatisticaService {
-  produtos: Array<Produto> = [];
 
   constructor(private produtoService: ProdutoService) {
-    this.capturarProdutos().then();
   }
 
-  private async capturarProdutos() {
-    this.produtos = await this.produtoService.obterProdutos();
+  async quantidadeProdutos(): Promise<number> {
+    return this.produtoService.getQuantidade();
   }
 
-  async quantidaadeProdutos(): Promise<number> {
-    return this.produtos.length;
+  async quantidadeProdutosMercado(): Promise<[string, number][]> {
+    const produtos = await this.produtoService.obterProdutos();
+    const mercadoQuantidadeMap: { [key: string]: number } = {};
+
+    produtos.forEach(produto => {
+      produto.mercado.forEach(mercado => {
+        if (mercadoQuantidadeMap[mercado.nome]) {
+          mercadoQuantidadeMap[mercado.nome]++;
+        } else {
+          mercadoQuantidadeMap[mercado.nome] = 1;
+        }
+      });
+    });
+
+    return Object.entries(mercadoQuantidadeMap);
+  }
+
+  async produtosMaiorQuantidade(): Promise<[string, number][]> {
+    const produtos = await this.produtoService.obterProdutos();
+    const produtosQuantidadeMap: { [key: string]: number } = {};
+
+    produtos.forEach(produto => {
+      if (produtosQuantidadeMap[produto.nome]) {
+        produtosQuantidadeMap[produto.nome] += produto.quantidade;
+      } else {
+        produtosQuantidadeMap[produto.nome] = produto.quantidade;
+      }
+    });
+
+    return Object.entries(produtosQuantidadeMap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 12);
   }
 }

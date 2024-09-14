@@ -63,5 +63,9 @@ export class ProdutoService {
     this.table.bulkDelete(ids);
     await this.carregarProdutos();
   }
+
+  async getQuantidade() {
+    return this.table.count();
+  }
 }
 
